@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const runtimeSkip = 2
+const runtimeSkip = 6
 
 // WithLineNumberFormatter struct for use with logrus
 type WithLineNumberFormatter struct {
@@ -17,16 +17,6 @@ type WithLineNumberFormatter struct {
 
 // Format entry
 func (f *WithLineNumberFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	te, err := f.TextFormatter.Format(entry)
-	if err != nil {
-		return nil, err
-	}
-	fe := append(fileInfo(), te...)
-	return fe, nil
-}
-
-// filInfo extract the fileInfo
-func fileInfo() []byte {
 	_, file, line, ok := runtime.Caller(runtimeSkip)
 	if !ok {
 		file = "<???>"
@@ -38,5 +28,10 @@ func fileInfo() []byte {
 		}
 	}
 	s := fmt.Sprintf("[%s:%d] ", file, line)
-	return []byte(s)
+	te, err := f.TextFormatter.Format(entry)
+	if err != nil {
+		return nil, err
+	}
+	fe := append([]byte(s), te...)
+	return fe, nil
 }
